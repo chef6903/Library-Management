@@ -9,15 +9,19 @@ import Footer from "../../components/Footer";
 import {
   checkIfReviewedByUser,
   createReview,
-} from "../../services/bookService"; // 🆕
+} from "../../services/bookService";
 
 const HistoryBorrowByUser = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+  });
+  const [hasReviewed, setHasReviewed] = useState({});
   const token = getToken();
   const userId = token ? checkUserAuth(token)?.id : null;
 
@@ -26,7 +30,8 @@ const HistoryBorrowByUser = () => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [hasReviewed, setHasReviewed] = useState({});
+  const [filterStatus, setFilterStatus] = useState("all");
+
   useEffect(() => {
     if (!userId) {
       setError("Người dùng chưa đăng nhập.");
@@ -36,8 +41,22 @@ const HistoryBorrowByUser = () => {
 
     const fetchData = async () => {
       try {
-        const result = await getBorrowedBooksByUser(userId);
+        setLoading(true);
+        const result = await getBorrowedBooksByUser(
+          userId,
+          currentPage,
+          10,
+          filterStatus
+        );
+
         setHistory(result.data || []);
+        setPagination(
+          result.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalRecords: 0,
+          }
+        );
       } catch (err) {
         setError("Không thể tải lịch sử mượn trả.");
       } finally {
@@ -46,35 +65,38 @@ const HistoryBorrowByUser = () => {
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, currentPage, filterStatus]);
 
   useEffect(() => {
     if (history.length > 0) {
       const checkReviews = async () => {
         const reviewStatus = {};
+
         for (const record of history) {
-          const res = await checkIfReviewedByUser(record.bookId._id, userId);
-          reviewStatus[record.bookId._id] = res.hasReviewed;
+          const bookId = record.bookId?._id;
+          if (!bookId) continue;
+
+          try {
+            const res = await checkIfReviewedByUser(bookId);
+            reviewStatus[bookId] = res.hasReviewed;
+          } catch (error) {
+            console.error(`Error checking review for book ${bookId}:`, error);
+          }
         }
+
         setHasReviewed(reviewStatus);
       };
 
       checkReviews();
     }
-  }, [history, userId]);
-
-  const totalPages = Math.ceil(history.length / itemsPerPage);
-  const paginatedData = history.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  }, [history]);
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+    if (currentPage < pagination.totalPages) setCurrentPage((prev) => prev + 1);
   };
 
   const formatDate = (dateStr, fallback = "Không rõ") => {
@@ -91,6 +113,8 @@ const HistoryBorrowByUser = () => {
         return "Chờ lấy sách";
       case "borrowed":
         return "Đang mượn";
+      case "overdue":
+        return "Quá hạn";
       case "returned":
         return "Đã trả";
       case "cancelled":
@@ -106,8 +130,16 @@ const HistoryBorrowByUser = () => {
     try {
       await cancelBorrowRequest(borrowId);
       alert("Đã huỷ yêu cầu mượn sách thành công.");
-      const result = await getBorrowedBooksByUser(userId);
+      const result = await getBorrowedBooksByUser(
+        userId,
+        currentPage,
+        10,
+        filterStatus
+      );
       setHistory(result.data || []);
+      setPagination(
+        result.pagination || { currentPage: 1, totalPages: 1, totalRecords: 0 }
+      );
     } catch (err) {
       alert("Không thể huỷ yêu cầu. Vui lòng thử lại sau.");
     }
@@ -130,12 +162,9 @@ const HistoryBorrowByUser = () => {
     if (!selectedBookId) return;
 
     setSubmittingReview(true);
-
     try {
       await createReview({ bookId: selectedBookId, rating, comment });
       alert("Đánh giá thành công!");
-      const result = await getBorrowedBooksByUser(userId);
-      setHistory(result.data || []);
       closeReviewPopup();
     } catch (error) {
       alert("Gửi đánh giá thất bại!");
@@ -174,13 +203,45 @@ const HistoryBorrowByUser = () => {
           📚 Lịch sử mượn trả của bạn
         </h2>
 
+        {/* Filter buttons */}
+        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+          {[
+            { value: "all", label: "Tất cả" },
+            { value: "waiting", label: "Đang chờ lấy" },
+            { value: "borrowing", label: "Đang mượn" },
+            { value: "returned", label: "Đã trả" },
+            { value: "cancelled", label: "Đã hủy" },
+          ].map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => {
+                setFilterStatus(value);
+                setCurrentPage(1);
+              }}
+              style={{
+                margin: "4px",
+                padding: "8px 16px",
+                fontSize: "14px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+                backgroundColor: filterStatus === value ? "#3498db" : "#f1f1f1",
+                color: filterStatus === value ? "white" : "black",
+                cursor: "pointer",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Table */}
         {loading && <p style={{ textAlign: "center" }}>Đang tải...</p>}
         {error && <p style={{ textAlign: "center", color: "red" }}>{error}</p>}
-        {!loading && !error && history.length === 0 && (
+        {!loading && history.length === 0 && (
           <p style={{ textAlign: "center" }}>Bạn chưa có lịch sử mượn sách.</p>
         )}
 
-        {!loading && paginatedData.length > 0 && (
+        {!loading && history.length > 0 && (
           <div style={{ overflowX: "auto" }}>
             <table
               style={{
@@ -195,56 +256,15 @@ const HistoryBorrowByUser = () => {
             >
               <thead style={{ backgroundColor: "#2c3e50", color: "white" }}>
                 <tr>
-                  <th
-                    style={{
-                      padding: "15px",
-                      textAlign: "left",
-                      minWidth: "250px",
-                    }}
-                  >
-                    📖 Tên sách & Bản sao
-                  </th>
-                  <th
-                    style={{
-                      padding: "15px",
-                      textAlign: "left",
-                      minWidth: "160px",
-                    }}
-                  >
-                    📅 Ngày mượn
-                  </th>
-                  <th
-                    style={{
-                      padding: "15px",
-                      textAlign: "left",
-                      minWidth: "160px",
-                    }}
-                  >
-                    📦 Ngày trả
-                  </th>
-                  <th
-                    style={{
-                      padding: "15px",
-                      textAlign: "left",
-                      minWidth: "160px",
-                    }}
-                  >
-                    {" "}
-                    Trạng thái
-                  </th>
-                  <th
-                    style={{
-                      padding: "15px",
-                      textAlign: "left",
-                      minWidth: "160px",
-                    }}
-                  >
-                    🛑 Hành động
-                  </th>
+                  <th style={{ padding: "15px" }}>📖 Tên sách & Bản sao</th>
+                  <th style={{ padding: "15px" }}>📅 Ngày mượn</th>
+                  <th style={{ padding: "15px" }}>📦 Ngày trả</th>
+                  <th style={{ padding: "15px" }}>Trạng thái</th>
+                  <th style={{ padding: "15px" }}>🛑 Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {paginatedData.map((record, index) => (
+                {history.map((record, index) => (
                   <tr
                     key={index}
                     style={{
@@ -264,7 +284,14 @@ const HistoryBorrowByUser = () => {
                         >
                           {record.bookCopies.map((copy) => (
                             <li key={copy._id}>
-                              📎 <strong>{copy.barcode}</strong> – {copy.status}
+                              📎 <strong>{copy.barcode}</strong> –{" "}
+                              {copy.status === "damaged"
+                                ? "Hỏng sách"
+                                : copy.status === "lost"
+                                ? "Mất sách"
+                                : copy.status === "available"
+                                ? "Tốt"
+                                : "Không xác định"}
                             </li>
                           ))}
                         </ul>
@@ -274,7 +301,9 @@ const HistoryBorrowByUser = () => {
                       {formatDate(record.createdRequestAt)}
                     </td>
                     <td style={{ padding: "15px" }}>
-                      {formatDate(record.returnDate, "Chưa trả")}
+                      {record.status === "cancelled"
+                        ? "---"
+                        : formatDate(record.returnDate, "Chưa trả")}
                     </td>
                     <td
                       style={{
@@ -286,6 +315,8 @@ const HistoryBorrowByUser = () => {
                             ? "blue"
                             : record.status === "cancelled"
                             ? "red"
+                            : record.status === "overdue"
+                            ? "#000"
                             : "green",
                       }}
                     >
@@ -308,21 +339,7 @@ const HistoryBorrowByUser = () => {
                         </button>
                       )}
                       {record.status === "returned" &&
-                        (hasReviewed[record.bookId._id] ? (
-                          <button
-                            style={{
-                              padding: "6px 12px",
-                              marginTop: "8px",
-                              backgroundColor: "#95a5a6",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Đã đánh giá
-                          </button>
-                        ) : (
+                        !hasReviewed[record.bookId._id] && (
                           <button
                             onClick={() => openReviewPopup(record.bookId._id)}
                             style={{
@@ -337,7 +354,20 @@ const HistoryBorrowByUser = () => {
                           >
                             📝 Đánh giá
                           </button>
-                        ))}
+                        )}
+
+                      {record.status === "returned" &&
+                        hasReviewed[record.bookId._id] && (
+                          <p
+                            style={{
+                              marginTop: "8px",
+                              color: "black",
+                              fontSize: "14px",
+                            }}
+                          >
+                            ✅ Đã đánh giá
+                          </p>
+                        )}
                     </td>
                   </tr>
                 ))}
@@ -347,6 +377,7 @@ const HistoryBorrowByUser = () => {
         )}
       </div>
 
+      {/* Pagination */}
       {!loading && history.length > 0 && (
         <div
           style={{
@@ -371,11 +402,12 @@ const HistoryBorrowByUser = () => {
             ← Trước
           </button>
           <span>
-            Trang <strong>{currentPage}</strong> / {totalPages}
+            Trang <strong>{pagination.currentPage}</strong> /{" "}
+            {pagination.totalPages}
           </span>
           <button
             onClick={handleNextPage}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === pagination.totalPages}
             style={{
               marginLeft: "10px",
               padding: "6px 14px",
@@ -390,7 +422,7 @@ const HistoryBorrowByUser = () => {
         </div>
       )}
 
-      {/* 🔽 Popup đánh giá */}
+      {/* Review Popup */}
       {isPopupOpen && (
         <div
           style={{
