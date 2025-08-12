@@ -578,22 +578,39 @@ exports.getReturnHistory = async (req, res) => {
 
     // Tạo kết quả cuối cùng
     const result = borrowRecords.map((borrowRecord) => {
-      const { bookcopies, ...bookIdWithoutCopies } =
-        borrowRecord.bookId.toObject();
+      // Nếu bookId null → thay bằng {}
+      const bookData = borrowRecord.bookId
+        ? borrowRecord.bookId.toObject()
+        : {};
+
+      const { bookcopies, ...bookIdWithoutCopies } = bookData;
+
       const fine = fineMap.get(borrowRecord._id.toString());
+
+      const copiesStatus = Array.isArray(bookcopies)
+        ? bookcopies[0]?.status
+        : null;
+
+      let note;
+      switch (copiesStatus) {
+        case "damaged":
+          note = "Hỏng sách";
+          break;
+        case "lost":
+          note = "Mất sách";
+          break;
+        case "available":
+          note = "Tốt";
+          break;
+        default:
+          note = "Không xác định";
+      }
 
       return {
         ...borrowRecord.toObject(),
         bookId: bookIdWithoutCopies,
         fine: fine || null,
-        note:
-          bookcopies?.[0]?.status === "damaged"
-            ? "Hỏng sách"
-            : bookcopies?.[0]?.status === "lost"
-            ? "Mất sách"
-            : bookcopies?.[0]?.status === "available"
-            ? "Tốt"
-            : "Không xác định",
+        note,
       };
     });
 
