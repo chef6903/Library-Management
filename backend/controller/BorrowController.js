@@ -66,6 +66,10 @@ exports.getAllBorrowedRequests = async (req, res) => {
     // Gắn thêm danh sách BookCopy cho từng yêu cầu
     const updatedRequests = await Promise.all(
       borrowRequests.map(async (record) => {
+        if (!record.bookId || !record.userId) {
+          return { ...record, bookCopies: [] }; // Không có dữ liệu -> trả mảng rỗng
+        }
+
         const bookCopies = await BookCopy.find({
           book: record.bookId._id,
           currentBorrower: record.userId._id,
@@ -74,7 +78,7 @@ exports.getAllBorrowedRequests = async (req, res) => {
 
         return {
           ...record,
-          bookCopies, // chèn vào kết quả trả về
+          bookCopies,
         };
       })
     );
@@ -92,6 +96,7 @@ exports.getAllBorrowedRequests = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("❌ Lỗi getAllBorrowedRequests:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -739,6 +744,7 @@ exports.confirmBookPickup = async (req, res) => {
       borrowRecord,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
