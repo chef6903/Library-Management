@@ -23,9 +23,23 @@ api.interceptors.request.use(
 
 export default api;
 
-export const loginUser = async (studentId, password) => {
+export const registerUser = async (username, email, password) => {
   try {
-    const response = await api.post("/auth/login", { studentId, password });
+    const response = await api.post("/auth/register", {
+      username,
+      email,
+      password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Registration failed:", error);
+    throw error;
+  }
+};
+
+export const loginUser = async (email, password) => {
+  try {
+    const response = await api.post("/auth/login", { email, password });
     return response.data.token;
   } catch (error) {
     console.error("Login failed:", error);
@@ -90,25 +104,21 @@ export const importUsersFromExcel = async (file) => {
   try {
     const token = getToken();
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
-    const response = await api.post(
-      '/auth/admin/import-users',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await api.post("/auth/admin/import-users", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return response.data;
   } catch (error) {
-    console.error('Error importing users:', error);
+    console.error("Error importing users:", error);
     throw error;
   }
-}
+};
 
 export const updateuser = async (userId, userData) => {
   try {
@@ -124,7 +134,7 @@ export const updateuser = async (userId, userData) => {
     );
     return response.data;
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error("Error updating user:", error);
     throw error;
   }
-}
+};

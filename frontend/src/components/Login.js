@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/api";
 import { saveToken } from "../utils/auth";
 import "../css/Login.css";
 import Header from "./Header";
 import Footer from "./Footer";
 function Login() {
-  const [username, setUsername, isActive] = useState("");
+  const [email, setEmail, isActive] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,8 +14,8 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!username) {
-      setError("Vui lòng kiểm tra tên đăng nhập của bạn.");
+    if (!email) {
+      setError("Vui lòng kiểm tra email của bạn.");
       return;
     }
     if (!password) {
@@ -28,7 +28,7 @@ function Login() {
     }
     setLoading(true);
     try {
-      const token = await loginUser(username, password);
+      const token = await loginUser(email, password);
       saveToken(token);
       navigate("/home");
     } catch (err) {
@@ -45,12 +45,12 @@ function Login() {
           <h2>Vui lòng nhập thông tin tài khoản</h2>
           <form onSubmit={handleLogin} className="login-form">
             <div className="form-group">
-              <label htmlFor="username">Mã số sinh viên</label>
+              <label htmlFor="username">Email</label>
               <input
                 type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter username"
                 required
               />
@@ -70,6 +70,12 @@ function Login() {
             <button type="submit" className="login-button" disabled={loading}>
               {loading ? "Logging in..." : "Login"}
             </button>
+            <p className="mt-4 text-center">
+              Bạn chưa có tài khoản?{" "}
+              <Link to="/register" className="text-blue-500 hover:underline">
+                Đăng ký tại đây
+              </Link>
+            </p>
           </form>
         </div>
       </div>

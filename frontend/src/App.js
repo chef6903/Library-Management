@@ -40,6 +40,7 @@ import HistoryReturnBook from "./pages/staff/HistoryReturnBook";
 
 // Staff - Report
 import Report from "./pages/staff/Report";
+import Register from "./components/Register";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -57,26 +58,56 @@ function App() {
   return (
     <Routes>
       {/* Common / Auth */}
-      <Route path="/" element={user?.role === "staff" ? <StaffDashboard /> : <HomePage />} />
+      <Route
+        path="/"
+        element={user?.role === "staff" ? <StaffDashboard /> : <HomePage />}
+      />
       <Route path="/login" element={<Login />} />
-      <Route path="/home" element={user?.role === "staff" ? <StaffDashboard /> : <HomePage />} />
-      <Route path="/profile" element={user ? <ViewUserProfile /> : <Navigate to="/login" />} />
-      <Route path="/change-password" element={user ? <ChangePassword /> : <Navigate to="/login" />}
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/home"
+        element={user?.role === "staff" ? <StaffDashboard /> : <HomePage />}
+      />
+      <Route
+        path="/profile"
+        element={user ? <ViewUserProfile /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/change-password"
+        element={user ? <ChangePassword /> : <Navigate to="/login" />}
       />
       {/* Admin */}
-      <Route path="/admin-dashboard" element={user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/login" />
-      }
+      <Route
+        path="/admin-dashboard"
+        element={
+          user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/login" />
+        }
       />
-      <Route path="/admin/users" element={user?.role === "admin" ? <UserListPage /> : <Navigate to="/login" />}
+      <Route
+        path="/admin/users"
+        element={
+          user?.role === "admin" ? <UserListPage /> : <Navigate to="/login" />
+        }
       />
-      <Route path="/admin/add-account" element={user?.role === "admin" ? <AddAccountPage /> : <Navigate to="/login" />
-      }
+      <Route
+        path="/admin/add-account"
+        element={
+          user?.role === "admin" ? <AddAccountPage /> : <Navigate to="/login" />
+        }
       />
 
-      <Route path="/history-borrowed-user" element={user ? <HistoryBorrowByUser /> : <Navigate to="/login" />} />
+      <Route
+        path="/history-borrowed-user"
+        element={user ? <HistoryBorrowByUser /> : <Navigate to="/login" />}
+      />
 
       {/* Redirect if not logged in */}
-      <Route path="/staff-dashboard" element={user?.role === "staff" ? <StaffDashboard /> : <Navigate to="/login" />} />
+      <Route
+        path="/staff-dashboard"
+        element={
+          user?.role === "staff" ? <StaffDashboard /> : <Navigate to="/login" />
+        }
+      />
       {/* Staff - Book CRUD */}
       <Route path="/staff/view-books" element={<ViewBookList />} />
       <Route path="/staff/add-book" element={<AddBook />} />
@@ -94,15 +125,23 @@ function App() {
 
       {/* Staff - Request */}
       <Route path="/staff/ViewListRequest" element={<ViewListRequest />} />
-      <Route path="/staff/view-borrowing-books" element={<ViewListBorrowed />} />
-      <Route path="/staff/borrows/borrow-history" element={<HistoryReturnBook />} />
+      <Route
+        path="/staff/view-borrowing-books"
+        element={<ViewListBorrowed />}
+      />
+      <Route
+        path="/staff/borrows/borrow-history"
+        element={<HistoryReturnBook />}
+      />
 
       {/* User - Book Detail */}
       <Route path="/detail-book/:id" element={<ViewBookDetail />} />
 
       {/* Staff - Report */}
-      <Route path="/staff/report" element={user?.role === "staff" ? <Report /> : <Navigate to="/login" />} />
-
+      <Route
+        path="/staff/report"
+        element={user?.role === "staff" ? <Report /> : <Navigate to="/login" />}
+      />
     </Routes>
   );
 }

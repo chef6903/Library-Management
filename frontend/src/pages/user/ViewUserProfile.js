@@ -87,7 +87,6 @@ const ProfilePage = () => {
               </h2>
               {[
                 { label: "👤 Họ tên", value: user.name },
-                { label: "🎓 Mã sinh viên", value: user.studentId },
                 { label: "📧 Email", value: user.email },
                 { label: "📱 Số điện thoại", value: user.phone },
                 { label: "🏠 Địa chỉ", value: user.address },
