@@ -39,7 +39,11 @@ function Login() {
   };
 
   return (
-    <div className="login-page">
+    <div
+      className="login-page"
+      style={{ background: "#efefef", padding: "20px 0" }}
+    >
+      <Header />
       <div className="login-content">
         <div className="login-container">
           <h2>Vui lòng nhập thông tin tài khoản</h2>

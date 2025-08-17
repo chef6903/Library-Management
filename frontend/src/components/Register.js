@@ -56,7 +56,7 @@ function RegisterPage() {
 
   return (
     <div
-      className="login-page" // Có thể đổi tên class CSS thành register-page cho rõ ràng
+      className="register-page" // Có thể đổi tên class CSS thành register-page cho rõ ràng
       style={{ background: "#efefef", padding: "20px 0" }}
     >
       <Header /> {/* Đảm bảo Header được render */}
