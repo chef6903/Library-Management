@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getToken } from "../utils/auth";
 
-const API_URL = "http://localhost:9999/api/v1";
+const API_URL = "https://library-management-qm87.onrender.com/api/v1";
 
 const api = axios.create({
   baseURL: API_URL,
