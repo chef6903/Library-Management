@@ -179,7 +179,8 @@ const HistoryBorrowByUser = () => {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        fontSize: "18px",
+        background: "#efefef",
+        paddingTop: "20px",
       }}
     >
       <Header />
@@ -381,47 +382,56 @@ const HistoryBorrowByUser = () => {
       {!loading && history.length > 0 && (
         <div
           style={{
-            textAlign: "center",
-            padding: "10px",
-            borderTop: "1px solid #ddd",
-            backgroundColor: "#f8f9fa",
+            display: "flex",
+            justifyContent: "center", // căn giữa ngang
+            alignItems: "center", // căn giữa dọc
           }}
         >
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage === 1}
+          <div
             style={{
-              marginRight: "10px",
-              padding: "6px 14px",
-              backgroundColor: "#3498db",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
+              textAlign: "center",
+              padding: "10px",
+              borderTop: "1px solid #ddd",
+              backgroundColor: "#f8f9fa",
+              maxWidth: "500px",
+              width: "100%",
             }}
           >
-            ← Trước
-          </button>
-          <span>
-            Trang <strong>{pagination.currentPage}</strong> /{" "}
-            {pagination.totalPages}
-          </span>
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === pagination.totalPages}
-            style={{
-              marginLeft: "10px",
-              padding: "6px 14px",
-              backgroundColor: "#3498db",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-            }}
-          >
-            Tiếp →
-          </button>
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              style={{
+                marginRight: "10px",
+                padding: "6px 14px",
+                backgroundColor: "#3498db",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              ← Trước
+            </button>
+            <span>
+              Trang <strong>{pagination.currentPage}</strong> /{" "}
+              {pagination.totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === pagination.totalPages}
+              style={{
+                marginLeft: "10px",
+                padding: "6px 14px",
+                backgroundColor: "#3498db",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              Tiếp →
+            </button>
+          </div>
         </div>
       )}
-
       {/* Review Popup */}
       {isPopupOpen && (
         <div
