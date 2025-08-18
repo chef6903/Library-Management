@@ -95,6 +95,18 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9999";
     { key: "-price", label: "Giá Cao Đến Thấp", children: <></> },
   ];
 
+const getSafeImage = (url) => {
+  if (!url || url.startsWith("blob:")) {
+    return "https://via.placeholder.com/200x300?text=No+Image";
+  }
+
+  if (url.startsWith('/images/book/')) {
+    return `${API_URL}${url}`;
+  }
+
+  return url;
+};
+     
   return (
     <div style={{ background: "#efefef", padding: "20px 0" }}>
       <Header />
@@ -228,7 +240,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9999";
                       <div className="wrapper">
                         <div className="thumbnail-fixed-ratio">
                           <img
-                            src={`${API_URL}/images/book/${item.image}`} 
+                             src={getSafeImage(item.image)}
                             alt="thumbnail book"
                             loading="lazy"
                           />
