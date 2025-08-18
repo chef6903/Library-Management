@@ -228,7 +228,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9999";
                       <div className="wrapper">
                         <div className="thumbnail-fixed-ratio">
                           <img
-                            <img src={`${API_URL}/images/book/${item.image}`} />
+                            src={`${API_URL}/images/book/${item.image}`} 
                             alt="thumbnail book"
                             loading="lazy"
                           />
