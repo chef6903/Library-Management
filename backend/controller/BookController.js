@@ -794,8 +794,8 @@ exports.getBookFilter = async (req, res) => {
     }
 
     if (category) {
-      const categoryArray = category.split(",");
-      query.categories = { $in: categoryArray };
+      const categoryIds = category.split(",").map(id => new mongoose.Types.ObjectId(id));
+      query.categories = { $in: categoryIds };
     }
 
     if (price) {
