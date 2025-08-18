@@ -793,9 +793,9 @@ exports.getBookFilter = async (req, res) => {
       ];
     }
 
-    if (category) {
-      const categoryIds = category.split(",").map(id => new mongoose.Types.ObjectId(id));
-      query.categories = { $in: categoryIds };
+        if (category) {
+      const categoryArr = category.split(","); // tách thành mảng
+      query.categories = { $in: categoryArr };
     }
 
     if (price) {
