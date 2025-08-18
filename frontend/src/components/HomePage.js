@@ -25,7 +25,7 @@ import { useSearch } from "../searchContext";
 
 const HomePage = () => {
   const { searchTerm } = useSearch();
-
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:9999";
   const [books, setBooks] = useState([]);
   const [priceRange, setPriceRange] = useState([0, 999999]);
   const [form] = Form.useForm();
@@ -228,7 +228,7 @@ const HomePage = () => {
                       <div className="wrapper">
                         <div className="thumbnail-fixed-ratio">
                           <img
-                            src={`http://localhost:9999${item.image}`}
+                            <img src={`${API_URL}/images/book/${item.image}`} />
                             alt="thumbnail book"
                             loading="lazy"
                           />
