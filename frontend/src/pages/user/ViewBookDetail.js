@@ -18,7 +18,7 @@ const ViewBookDetail = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
-
+const API_URL = process.env.REACT_APP_API_URL
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -77,17 +77,17 @@ const ViewBookDetail = () => {
     }
   };
 
-  const getSafeImage = (url) => {
-    if (!url || url.startsWith("blob:")) {
-      return "https://via.placeholder.com/200x300?text=No+Image";
-    }
+const getSafeImage = (url) => {
+  if (!url || url.startsWith("blob:")) {
+    return "https://via.placeholder.com/200x300?text=No+Image";
+  }
 
-    if (url.startsWith('/images/book/')) {
-      return `http://localhost:9999${url}`;
-    }
+  if (url.startsWith('/images/book/')) {
+    return `${API_URL}${url}`;
+  }
 
-    return url;
-  };
+  return url;
+};
 
   if (!book) return <div style={{ padding: '20px' }}>Đang tải...</div>;
 
